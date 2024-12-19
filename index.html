@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажер для изучения иностранных слов</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e0f7fa;
+            color: #004d40;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 300px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .word-container {
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        input {
+            padding: 10px;
+            width: 90%;
+            margin-bottom: 10px;
+            border: 1px solid #009688;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #009688;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 90%;
+        }
+
+        button:hover {
+            background-color: #00796b;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        #progress {
+            height: 20px;
+            background-color: #009688;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="app-title">Регистрация / Вход</h1>
+        <div id="auth-forms">
+            <div id="register-form">
+                <h2>Регистрация</h2>
+                <input type="text" id="register-username" placeholder="Имя пользователя" required>
+                <input type="password" id="register-password" placeholder="Пароль" required>
+                <button id="register-btn">Зарегистрироваться</button>
+            </div>
+            <div id="login-form" class="hidden">
+                <h2>Вход</h2>
+                <input type="text" id="login-username" placeholder="Имя пользователя" required>
+                <input type="password" id="login-password" placeholder="Пароль" required>
+                <button id="login-btn">Войти</button>
+            </div>
+            <button id="toggle-auth-btn">Нет аккаунта? Зарегистрируйтесь</button>
+        </div>
+
+        <div id="word-game" class="hidden">
+            <h1>Тренажер для изучения иностранных слов</h1>
+            <div class="word-container">
+                <h2 id="word">Слово</h2>
+            </div>
+            <input type="text" id="answer" placeholder="Введите перевод">
+            <button id="submit">Проверить</button>
+            <div id="result"></div>
+            <div id="progress-bar">
+                <div id="progress"></div>
+            </div>
+            <button id="next">Следующее слово</button>
+        </div>
+    </div>
+
+    <script>
+        const users = [];
+        let currentWordIndex = 0;
+        let correctAnswers = 0;
+
+        // Словарь
+        const words = [
+            { foreign: "apple", translation: "яблоко" },
+            { foreign: "book", translation: "книга" },
+            { foreign: "car", translation: "машина" },
+            { foreign: "house", translation: "дом" },
+            { foreign: "tree", translation: "дерево" },
+            { foreign: "water", translation: "вода" },
+            { foreign: "sun", translation: "солнце" },
+            { foreign: "moon", translation: "луна" },
+            { foreign: "star", translation: "звезда" },
+            { foreign: "sky", translation: "небо" },
+            { foreign: "flower", translation: "цветок" },
+            { foreign: "dog", translation: "собака" },
+            { foreign: "cat", translation: "кошка" },
+            { foreign: "bird", translation: "птица" },
+            { foreign: "fish", translation: "рыба" },
+            { foreign: "rain", translation: "дождь" },
+            { foreign: "snow", translation: "снег" },
+            { foreign: "mountain", translation: "гора" },
+            { foreign: "river", translation: "река" },
+            { foreign: "road", translation: "дорога" },
+            { foreign: "city", translation: "город" }
+        ];
+
+        function toggleAuthForms() {
+            const registerForm = document.getElementById("register-form");
+            const loginForm = document.getElementById("login-form");
+            const toggleAuthBtn = document.getElementById("toggle-auth-btn");
+
+            if (registerForm.classList.contains("hidden")) {
+                registerForm.classList.remove("hidden");
+                loginForm.classList.add("hidden");
+                toggleAuthBtn.textContent = "Уже есть аккаунт? Вход";
+            } else {
+                registerForm.classList.add("hidden");
+                loginForm.classList.remove("hidden");
+                toggleAuthBtn.textContent = "Нет аккаунта? Зарегистрируйтесь";
+            }
+        }
+
+        document.getElementById("toggle-auth-btn").addEventListener("click", toggleAuthForms);
+
+        document.getElementById("register-btn").addEventListener("click", function() {
+            const username = document.getElementById("register-username").value;
+            const password = document.getElementById("register-password").value;
+
+            if (username && password) {
+                if (users.some(user => user.username === username)) {
+                    alert("Пользователь с таким именем уже зарегистрирован.");
+                    return;
+                }
+                users.push({ username, password });
+                alert("Регистрация прошла успешно!");
+                toggleAuthForms();
+            }
+        });
+
+        document.getElementById("login-btn").addEventListener("click", function() {
+            const username = document.getElementById("login-username").value;
+            const password = document.getElementById("login-password").value;
+
+            const user = users.find(user => user.username === username && user.password === password);
+            if (user) {
+                alert("Вход выполнен успешно!");
+                document.getElementById("auth-forms").classList.add("hidden");
+                document.getElementById("word-game").classList.remove("hidden");
+                displayWord();
+            } else {
+                alert("Неверное имя пользователя или пароль.");
+            }
+        });
+
+        function displayWord() {
+            const wordElement = document.getElementById("word");
+            wordElement.textContent = words[currentWordIndex].foreign;
+            document.getElementById("result").textContent = "";
+            document.getElementById("answer").value = "";
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById("progress");
+            const progressPercentage = (correctAnswers / words.length) * 100;
+            progressBar.style.width = progressPercentage + '%';
+        }
+
+        document.getElementById("submit").addEventListener("click", function() {
+            const userAnswer = document.getElementById("answer").value.toLowerCase();
+            const correctAnswer = words[currentWordIndex].translation.toLowerCase();
+            const resultElement = document.getElementById("result");
+
+            if (userAnswer === correctAnswer) {
+                resultElement.textContent = "Правильно!";
+                correctAnswers++;
+            } else {
+                resultElement.textContent = `Неправильно. Правильный ответ: ${correctAnswer}`;
+            }
+            updateProgress();
+        });
+
+        document.getElementById("next").addEventListener("click", function() {
+            currentWordIndex = (currentWordIndex + 1) % words.length;
+            displayWord();
+        });
+    </script>
+</body>
+</html>
